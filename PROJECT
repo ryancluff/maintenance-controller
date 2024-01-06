@@ -7,4 +7,14 @@ layout:
 - go.kubebuilder.io/v4
 projectName: maintenance-controller
 repo: rcluff.com/maintenance-controller
+resources:
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: rcluff.com
+  group: cluster
+  kind: MaintenanceMode
+  path: rcluff.com/maintenance-controller/api/v1
+  version: v1
 version: "3"
