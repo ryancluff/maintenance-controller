@@ -17,6 +17,7 @@ limitations under the License.
 package v1
 
 import (
+	appsv1 "k8s.io/api/apps/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -30,35 +31,50 @@ type MaintenanceModeSpec struct {
 	// When enabled, the controller will scale down all pods that are using the storage class specified in the spec.
 	Enable bool `json:"enable"`
 
+	// Specifies the status of the MaintenanceMode.
+	// Valid values are:
+	// - "cluster" (default): the controller will scale down all deployments utilizing the specified storage class in the entire cluster;
+	// - "namespace": the controller will scale down all deployments utilizing the specified storage class in the namespace of the MaintenanceMode resource;
+	Scope Scope `json:"scope,omitempty"`
+
 	// The name of the storage class. Defaults to all if not specified.
-	StorageClasses []string `json:"storageClass,omitempty"`
+	StorageClassNames []string `json:"storageClassNames,omitempty"`
 }
+
+// State is the current status of maintenance mode
+type Scope string
+
+const (
+	ClusterScope   Scope = "cluster"
+	NamespaceScope Scope = "namespace"
+)
 
 // MaintenanceModeStatus defines the observed state of MaintenanceMode
 type MaintenanceModeStatus struct {
-	// Important: Run "make" to regenerate code after modifying this file
-
 	// Specifies the status of the MaintenanceMode.
 	// Valid values are:
 	// - "Pending" (default): the controller has not processed the request to enable/disable maintenance mode;
-	// - "InProgress": the controller is processing the request to enable/disable maintenance mode;
-	// - "Ready": the state is synced to enable/disable maintenance mode.
-	// State State `json:"state,omitempty"`
+	// - "ScalingUp": the controller is scaling up all deployments utilizing the specified storage class;
+	// - "ScalingDown": the controller is scaling down all deployments utilizing the specified storage class;
+	// - "Enabled": All deployments utilizing the specified storage class are scale to 0 and there are no longer any pods running.
+	// - "Disabled": All deployments utilizing the specified storage class are scaled back to their original state. This can be overridden by another MaintenanceMode resource.
+	State State `json:"state,omitempty"`
 
 	// Specifies the list of deployments that are currently being targeted.
-	// Targets []appsv1.Deployment `json:"targets,omitempty"`
+	Targets []appsv1.Deployment `json:"targets,omitempty"`
 }
 
-// +kubebuilder:validation:Enum=Pending;InProgress;Ready;Conflicted
+// +kubebuilder:validation:Enum=Pending;ScalingUp;ScalingDown;Enabled;Disabled
 
 // State is the current status of maintenance mode
 type State string
 
 const (
-	PendingState    State = "Pending"
-	InProgressState State = "InProgress"
-	ReadyState      State = "Ready"
-	ConflictedState State = "Conflicted"
+	PendingState     State = "Pending"
+	ScalingUpState   State = "ScalingUp"
+	ScalingDownState State = "ScalingDown"
+	EnabledState     State = "Enabled"
+	DisabledState    State = "Disabled"
 )
 
 //+kubebuilder:object:root=true

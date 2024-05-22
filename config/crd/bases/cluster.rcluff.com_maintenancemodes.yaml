@@ -39,7 +39,14 @@ spec:
                   controller will scale down all pods that are using the storage class
                   specified in the spec.
                 type: boolean
-              storageClass:
+              scope:
+                description: 'Specifies the status of the MaintenanceMode. Valid values
+                  are: - "cluster" (default): the controller will scale down all deployments
+                  utilizing the specified storage class in the entire cluster; - "namespace":
+                  the controller will scale down all deployments utilizing the specified
+                  storage class in the namespace of the MaintenanceMode resource;'
+                type: string
+              storageClassNames:
                 description: The name of the storage class. Defaults to all if not
                   specified.
                 items:
@@ -54,15 +61,20 @@ spec:
               state:
                 description: 'Specifies the status of the MaintenanceMode. Valid values
                   are: - "Pending" (default): the controller has not processed the
-                  request to enable/disable maintenance mode; - "InProgress": the
-                  controller is processing the request to enable/disable maintenance
-                  mode; - "Ready": the state is synced to enable/disable maintenance
-                  mode.'
+                  request to enable/disable maintenance mode; - "ScalingUp": the controller
+                  is scaling up all deployments utilizing the specified storage class;
+                  - "ScalingDown": the controller is scaling down all deployments
+                  utilizing the specified storage class; - "Enabled": All deployments
+                  utilizing the specified storage class are scale to 0 and there are
+                  no longer any pods running. - "Disabled": All deployments utilizing
+                  the specified storage class are scaled back to their original state.
+                  This can be overridden by another MaintenanceMode resource.'
                 enum:
                 - Pending
-                - InProgress
-                - Ready
-                - Conflicted
+                - ScalingUp
+                - ScalingDown
+                - Enabled
+                - Disabled
                 type: string
               targets:
                 description: Specifies the list of deployments that are currently

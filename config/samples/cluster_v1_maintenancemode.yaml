@@ -9,4 +9,5 @@ metadata:
     app.kubernetes.io/created-by: maintenance-controller
   name: maintenancemode-sample
 spec:
-  # TODO(user): Add fields here
+  enable: true
+  scope: cluster
